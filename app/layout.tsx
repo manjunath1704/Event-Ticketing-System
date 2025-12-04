@@ -1,6 +1,15 @@
 import './globals.css';
 import * as React from 'react';
-import { AuthProvider } from '../components/AuthProvider';
+import { AuthProvider } from '@/components/AuthProvider';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { Red_Hat_Text } from 'next/font/google';
+
+const redHat = Red_Hat_Text({
+  subsets: ['latin'],
+  weight: ['300','400','500','600','700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Event Ticketing System',
@@ -13,13 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="font-sans">
-        <AuthProvider>
-          <div className="min-h-screen bg-gray-50">
+    <html lang="en" className={redHat.variable}>
+      <body>
+        <ThemeProvider>
+          <AuthProvider>
             {children}
-          </div>
-        </AuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

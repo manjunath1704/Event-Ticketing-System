@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
       razorpay_payment_id,
       razorpay_signature,
       eventId,
-      userId,
     } = await request.json();
 
     // Verify signature
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
     const ticketsCollection = collection(db, 'tickets');
     const ticketDoc = await addDoc(ticketsCollection, {
       eventId,
-      userId,
       paymentId: razorpay_payment_id,
       isUsed: false,
       purchaseDate: new Date().toISOString(),

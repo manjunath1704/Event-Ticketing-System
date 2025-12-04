@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
@@ -25,10 +27,12 @@
     "razorpay": "^2.9.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-hook-form": "^7.68.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "eslint": "^8.0.0",

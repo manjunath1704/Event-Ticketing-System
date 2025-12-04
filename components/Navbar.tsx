@@ -1,15 +1,19 @@
 'use client';
-
 import Link from 'next/link';
-import { useAuth } from './AuthProvider';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { useAuth } from '@/components/AuthProvider';
+import { Button } from '@/components/ui/button';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user, signOut, loading } = useAuth();
+  const { theme, toggle } = useTheme();
 
   const handleSignOut = async () => {
-    await signOut(auth);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -19,25 +23,51 @@ export default function Navbar() {
           <Link href="/" className="text-2xl font-bold">
             EventTickets
           </Link>
-          <div className="space-x-4">
-            {user ? (
+          <div className="flex items-center space-x-4">
+            <Link href="/my-tickets" className="hover:underline">
+              My Tickets
+            </Link>
+            <Link href="/admin" className="hover:underline">
+              Admin
+            </Link>
+            {!loading && (
               <>
-                <Link href="/my-tickets" className="hover:underline">
-                  My Tickets
-                </Link>
-                {user.isAdmin && (
-                  <Link href="/admin" className="hover:underline">
-                    Admin
-                  </Link>
+                {user ? (
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm">Welcome, {user.name}!</span>
+                    <Button 
+                      onClick={toggle}
+                      variant="ghost"
+                      className="text-white border-white/30"
+                    >
+                      {theme === 'dark' ? 'Light' : 'Dark'}
+                    </Button>
+                    <Button 
+                      onClick={handleSignOut}
+                      variant="outline"
+                      className="bg-white text-blue-600 hover:bg-gray-100"
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Link href="/login">
+                      <Button variant="outline" className="bg-white text-blue-600 hover:bg-gray-100">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/signup">
+                      <Button className="bg-blue-800 hover:bg-blue-900">
+                        Sign Up
+                      </Button>
+                    </Link>
+                    <Button onClick={toggle} variant="ghost" className="text-white border-white/30">
+                      {theme === 'dark' ? 'Light' : 'Dark'}
+                    </Button>
+                  </div>
                 )}
-                <button onClick={handleSignOut} className="hover:underline">
-                  Sign Out
-                </button>
               </>
-            ) : (
-              <Link href="/auth" className="hover:underline">
-                Sign In
-              </Link>
             )}
           </div>
         </div>

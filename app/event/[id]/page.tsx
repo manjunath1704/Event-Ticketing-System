@@ -5,13 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Event } from '@/types';
-import { useAuth } from '@/components/AuthProvider';
 import { loadRazorpayScript } from '@/lib/razorpay';
 
 export default function EventPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,11 +35,6 @@ export default function EventPage() {
   }, [params.id]);
 
   const handleBookTicket = async () => {
-    if (!user) {
-      router.push('/auth');
-      return;
-    }
-
     if (!event) return;
 
     try {
@@ -76,7 +69,6 @@ export default function EventPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               eventId: event.id,
-              userId: user.id,
             }),
           });
 
@@ -85,8 +77,8 @@ export default function EventPage() {
           }
         },
         prefill: {
-          name: user.name,
-          email: user.email,
+          name: '',
+          email: '',
         },
       };
 
