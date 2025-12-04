@@ -119,4 +119,14 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, "Apple Color Emoji", "Segoe UI Emoji";
   }
+
+  /* Page background utility used by login/signup to add a themed image */
+  .page-bg {
+    /* Darker gradient overlay on top of the local image for higher contrast */
+    background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.45)), url('/images/auth-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
 }

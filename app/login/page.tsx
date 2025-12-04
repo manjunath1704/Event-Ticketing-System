@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Eye, EyeOff } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -34,6 +35,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
   const [error, setError] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
   const { signIn, user, loading } = useAuth();
   const router = useRouter();
 
@@ -44,6 +46,29 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  // Fetch party images from our server API and fall back to a local image
+  const [partyImages, setPartyImages] = React.useState<string[]>([]);
+  React.useEffect(() => {
+    let mounted = true;
+    const fetchImages = async () => {
+      try {
+        const res = await fetch('/api/pexels/party?per_page=4');
+        const data = await res.json();
+        if (!mounted) return;
+        if (Array.isArray(data.photos) && data.photos.length) {
+          setPartyImages(data.photos);
+        } else {
+          setPartyImages(['/images/auth-bg.jpg']);
+        }
+      } catch (e) {
+        console.error('Failed to fetch party images', e);
+        if (mounted) setPartyImages(['/images/auth-bg.jpg']);
+      }
+    };
+    fetchImages();
+    return () => { mounted = false; };
+  }, []);
 
   // Debug logs to help diagnose hanging/loading issues
   React.useEffect(() => {
@@ -70,21 +95,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Welcome Back
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access your account
-          </CardDescription>
+    <div className="min-h-screen flex items-center justify-center page-bg p-6 relative overflow-hidden">
+      {/* Decorative blurred circles */}
+      <div className="absolute -left-20 -top-20 w-72 h-72 bg-gradient-to-tr from-indigo-300 via-pink-300 to-yellow-200 rounded-full opacity-30 blur-3xl transform rotate-45"></div>
+      <div className="absolute -right-24 -bottom-24 w-96 h-96 bg-gradient-to-br from-sky-300 via-purple-300 to-pink-200 rounded-full opacity-30 blur-3xl"></div>
+
+      {/* Party image collage behind the card */}
+      <div className="absolute left-8 bottom-10 z-0 flex gap-3">
+        {(partyImages.length ? partyImages : ['/images/auth-bg.jpg']).map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`party-${i}`}
+            className={`w-24 h-16 object-cover rounded-lg shadow-lg border border-white/30 transform transition duration-500 ${i % 2 === 0 ? 'rotate-1' : '-rotate-1'} hover:scale-110`}
+          />
+        ))}
+      </div>
+
+      <Card className="w-full max-w-md bg-white/70 backdrop-blur-md border border-white/30 shadow-2xl rounded-2xl text-gray-900 relative z-10">
+        <CardHeader className="space-y-2 pt-8">
+        <CardTitle className="text-xl">Welcome Back</CardTitle>
+        <CardDescription className="text-sm text-gray-600">Sign in to continue to Event Ticketing</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
                   {error}
                 </div>
               )}
@@ -98,6 +135,7 @@ export default function LoginPage() {
                       <Input
                         type="email"
                         placeholder="you@example.com"
+                        className="text-white"
                         {...field}
                         disabled={form.formState.isSubmitting}
                       />
@@ -112,21 +150,33 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                           className="text-white"
+                          placeholder="••••••••"
+                          {...field}
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((s) => !s)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
@@ -134,13 +184,14 @@ export default function LoginPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col items-center gap-2 pb-8">
           <p className="text-sm text-center text-gray-600">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-blue-600 hover:underline font-medium">
+            <Link href="/signup" className="text-indigo-600 hover:underline font-medium">
               Sign up
             </Link>
           </p>
+          <div className="mt-2 text-xs text-gray-500">By continuing you agree to our Terms of Service</div>
         </CardFooter>
       </Card>
     </div>
